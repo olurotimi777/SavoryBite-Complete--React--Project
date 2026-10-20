@@ -1,0 +1,17 @@
+import { useCallback,useEffect,useState } from 'react';
+import { AnimatePresence,motion } from 'framer-motion';
+import { CheckCircle2,Heart,ShoppingBag,X } from 'lucide-react';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import Categories from './components/Categories';
+import FeaturedMenu from './components/FeaturedMenu';
+import About from './components/About';
+import SpecialOffers from './components/SpecialOffers';
+import WhyChooseUs from './components/WhyChooseUs';
+import Testimonials from './components/Testimonials';
+import Gallery from './components/Gallery';
+import Newsletter from './components/Newsletter';
+import Contact from './components/Contact';
+import Footer from './components/Footer';
+import CartDrawer from './components/CartDrawer';
+export default function App(){const [category,setCategory]=useState('All'),[favorites,setFavorites]=useState([]),[cart,setCart]=useState([]),[cartOpen,setCartOpen]=useState(false),[toast,setToast]=useState(null);const notify=useCallback((text,kind='success')=>setToast({text,kind,id:Date.now()}),[]);useEffect(()=>{if(!toast)return;const timer=setTimeout(()=>setToast(null),2800);return()=>clearTimeout(timer)},[toast]);const add=item=>{setCart(items=>{const found=items.find(i=>i.id===item.id);return found?items.map(i=>i.id===item.id?{...i,quantity:i.quantity+1}:i):[...items,{...item,quantity:1}]});notify(`${item.name} added to demo cart!`)};const toggleFavorite=id=>{const liked=favorites.includes(id);setFavorites(list=>liked?list.filter(x=>x!==id):[...list,id]);notify(liked?'Removed from favorites':'Added to favorites','favorite')};const changeQty=(id,delta)=>setCart(items=>items.map(item=>item.id===id?{...item,quantity:item.quantity+delta}:item).filter(item=>item.quantity>0));const remove=id=>{setCart(items=>items.filter(item=>item.id!==id));notify('Item removed from cart')};const clear=()=>{setCart([]);notify('Cart cleared')};const chooseCategory=cat=>{setCategory(cat);document.getElementById('menu')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})};const count=cart.reduce((s,i)=>s+i.quantity,0);return <><a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-white focus:p-3">Skip to main content</a><Navbar cartCount={count} onCartOpen={()=>setCartOpen(true)}/><main id="main-content"><Hero/><Categories active={category} onChoose={chooseCategory}/><FeaturedMenu category={category} setCategory={setCategory} favorites={favorites} onFavorite={toggleFavorite} onAdd={add}/><About/><SpecialOffers/><WhyChooseUs/><Testimonials/><Gallery/><Newsletter/><Contact/></main><Footer onCategory={chooseCategory}/><CartDrawer open={cartOpen} onClose={()=>setCartOpen(false)} cart={cart} onChange={changeQty} onRemove={remove} onClear={clear}/><AnimatePresence>{toast&&<motion.div role="status" key={toast.id} initial={{opacity:0,y:25}} animate={{opacity:1,y:0}} exit={{opacity:0,y:16}} className="fixed bottom-5 left-1/2 z-[80] flex w-[calc(100%-32px)] max-w-max -translate-x-1/2 items-center gap-3 rounded-2xl bg-charcoal px-5 py-4 text-xs font-semibold text-white shadow-2xl">{toast.kind==='favorite'?<Heart size={18} className="shrink-0 text-orange-400"/>:<CheckCircle2 size={18} className="shrink-0 text-green-400"/>}{toast.text}<button onClick={()=>setToast(null)} aria-label="Dismiss notification" className="ml-1 text-slate-300"><X size={15}/></button></motion.div>}</AnimatePresence></>}
